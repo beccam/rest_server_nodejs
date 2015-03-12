@@ -10,13 +10,13 @@ app.get('/', function (req, res) {
   res.sendStatus('Hello World!')
 })
 
-// accept POST request on the homepage
-//app.post('/user', function (req, res) {
-//  res.sendStatus('Got a POST request');
+//accept POST request on the homepage
+//app.post('/users', function (req, res) {
+//res.sendStatus('Got a POST request');
 //})
 
 // accept POST request on the homepage
-app.post('/user', function (req, res) {
+app.post('/users', function (req, res) {
   var lastname=req.body.lastname;
   var age=req.body.age;
   var city=req.body.city;
@@ -24,9 +24,9 @@ app.post('/user', function (req, res) {
   var firstname=req.body.firstname;
 
   console.log("lastname = "+lastname+", age= "+age+", city= "+city+", email= "+email+", firstname= "+firstname);
-  client.execute("INSERT INTO users (lastname, age, city, email, firstname) VALUES ( '" + lastname + "',"
-  + age + ",'" + city + "' ,'" + email + "','" + firstname + "')",
-   function (err, result) {
+  var query = "INSERT INTO users (lastname, age, city, email, firstname) VALUES ( ?,?,?,?,?)";
+  var params = [lastname, age, city, email, firstname];
+  client.execute(query, params, {prepare: true}, function (err, result) {
       if (!err) {
         res.sendStatus("Inserted");
       } else {
@@ -39,10 +39,12 @@ app.post('/user', function (req, res) {
 
 
 // Accept a GET and get a user record
-// Ex: http://127.0.0.1:3000/user/Jones will get lastname Jones from the DB
-app.get('/user/:lastname',function (req, res) {
+// Ex: http://127.0.0.1:3000/user/Jones will get lastname Jones from the DB req.params.lastname
+app.get('/users/:lastname',function (req, res) {
 
-  client.execute("SELECT lastname, age, city, email, firstname FROM users WHERE lastname='" + req.params.lastname + "'", function (err, result) {
+  var query = "SELECT lastname, age, city, email, firstname FROM users WHERE lastname= ?";
+  var params = [req.params.lastname];
+  client.execute(query, params, {prepare: true}, function (err, result) {
     if (!err){
       if ( result.rows.length > 0 ) {
         var user = result.rows[0];
@@ -57,10 +59,10 @@ app.get('/user/:lastname',function (req, res) {
 
 // Accept a DELETE and get a user record
 // Ex: http://127.0.0.1:3000/user/Jones will delete lastname Jones from the DB
-app.delete('/user/:lastname', function (req, res) {
-  client.execute("DELETE FROM users WHERE lastname = '" + req.params.lastname + "'", function (err, result) {
-    var user = result.Type;
-    console.log(user);
+app.delete('/users/:lastname', function (req, res) {
+  var query = "DELETE FROM users WHERE lastname = ?";
+  var params = [req.params.lastname];
+  client.execute(query, params, {prepare: true}, function (err, result) {
 
       if (!err) {
         res.sendStatus("Deleted");
@@ -70,12 +72,13 @@ app.delete('/user/:lastname', function (req, res) {
   });
 })
 
-app.put('/user/:lastname', function (req, res) {
+app.put('/users/:lastname', function (req, res) {
   var age=req.body.age;
 
   console.log("lastname = "+req.params.lastname+", age= "+age);
-    client.execute("UPDATE users SET age = "+ age +" WHERE lastname = '" + req.params.lastname + "'",
-    function (err, result) {
+  var query = "UPDATE users SET age = ? WHERE lastname = ?";
+  var params = [age, req.params.lastname];
+  client.execute(query, params, {prepare: true}, function (err, result) {
         if (!err) {
           res.sendStatus("Updated");
         } else {
