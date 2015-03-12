@@ -1,11 +1,16 @@
 var express = require('express')
 var bodyParser = require('body-parser');
 var cassandra = require('cassandra-driver');
+var DCAwareRoundRobinPolicy = cassandra.policies.DCAwareRoundRobinPolicy;
+var RetryPolicy = cassandra.policies.RetryPolicy;
 
 var app = express()
 app.use(bodyParser.urlencoded({ extended: false }));
-var client = new cassandra.Client({contactPoints: ['127.0.0.1'], keyspace: 'demo'});
-
+var client = new cassandra.Client({
+  contactPoints: ['127.0.0.1'], keyspace: 'demo'});
+  policies: {
+      retry: new RetryPolicy()
+      loadBalancing: new DCAwareRoundRobinPolicy('datacenter1');
 app.get('/', function (req, res) {
   res.sendStatus('Hello World!')
 })
