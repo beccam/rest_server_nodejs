@@ -31,7 +31,7 @@ app.post('/users', function (req, res) {
 
     client.execute(query, params, {prepare: true}, function (err, result) {
         if (!err) {
-            res.sendStatus("Inserted");
+            res.send("Inserted");
         } else {
             res.sendStatus(404)
         }
@@ -50,7 +50,7 @@ app.get('/users/:lastname', function (req, res) {
             if (result.rows.length > 0) {
                 var user = result.rows[0];
                 console.log("name = %s, age = %d", user.firstname, user.age);
-                res.sendStatus(user)
+                res.send(user)
             } else {
                 res.sendStatus(404);
             }
@@ -67,7 +67,7 @@ app.delete('/users/:lastname', function (req, res) {
     client.execute(query, params, {prepare: true}, function (err, result) {
 
         if (!err) {
-            res.sendStatus("Deleted");
+            res.send("Deleted");
         } else {
             res.sendStatus(404)
         }
@@ -84,7 +84,7 @@ app.put('/users/:lastname', function (req, res) {
 
     client.execute(query, params, {prepare: true}, function (err, result) {
         if (!err) {
-            res.sendStatus("Updated");
+            res.send("Updated");
         } else {
             res.sendStatus(404)
         }
